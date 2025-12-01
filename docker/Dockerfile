@@ -1,8 +1,14 @@
 FROM rockylinux:9.1 AS base
-ENV TROUTE_REPO=CIROH-UA/t-route
-ENV TROUTE_BRANCH=ngiab
-ENV NGEN_REPO=CIROH-UA/ngen
-ENV NGEN_BRANCH=ngiab
+
+ARG NGEN_REPO=CIROH-UA/ngen
+ARG NGEN_BRANCH=ngiab
+ARG TROUTE_REPO=CIROH-UA/t-route
+ARG TROUTE_BRANCH=ngiab
+
+ENV TROUTE_REPO=${TROUTE_REPO}
+ENV TROUTE_BRANCH=${TROUTE_BRANCH}
+ENV NGEN_REPO=${NGEN_REPO}
+ENV NGEN_BRANCH=${NGEN_BRANCH}
 
 # Install final dependencies to make sure ngen is build and deployed with matching versions
 # Needed here for build caching
@@ -227,6 +233,10 @@ COPY --from=lstm_weights /lstm_weights/trained_neuralhydrology_models /ngen/ngen
 
 # Copy the rust version of the lstm over.
 COPY --from=burn_lstm /build/rust-lstm-1025/target/release/librust_lstm_1025.so /dmod/shared_libs/librust_lstm_1025.so
+
+# Install CopyCat
+COPY --from=ngen_clone /ngen/ngen/extern/copycat/copycat /ngen/ngen/extern/copycat
+RUN uv pip install --no-cache-dir /ngen/ngen/extern/copycat
 
 ## add some metadata to the image
 COPY --from=troute_build /tmp/troute_url /ngen/troute_url
