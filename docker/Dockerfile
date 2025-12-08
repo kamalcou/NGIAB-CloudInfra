@@ -19,6 +19,10 @@ RUN dnf update -y && \
     dnf install -y \
     vim libgfortran sqlite \
     bzip2 expat udunits2 zlib \
+    mpich hdf5 netcdf netcdf-fortran netcdf-cxx netcdf-cxx4-mpich && \
+    dnf install -y 'dnf-command(versionlock)' && \
+    dnf versionlock add python3 libgfortran sqlite \
+    bzip2 expat udunits2 zlib \
     mpich hdf5 netcdf netcdf-fortran netcdf-cxx netcdf-cxx4-mpich
 # Install UV and setup cargo bin for rust tools (uv and cargo)
 ENV PATH="/root/.cargo/bin:${PATH}"
@@ -30,7 +34,8 @@ RUN uv self update
 FROM base AS build_base
 # no dnf update to keep devel packages consistent with versions installed in base
 RUN echo "max_parallel_downloads=10" >> /etc/dnf/dnf.conf
-RUN dnf install -y epel-release && \
+RUN dnf update -y && \
+    dnf install -y epel-release && \
     dnf config-manager --set-enabled crb && \
     dnf install -y \
     sudo gcc gcc-c++ make cmake ninja-build tar git gcc-gfortran libgfortran sqlite sqlite-devel \
