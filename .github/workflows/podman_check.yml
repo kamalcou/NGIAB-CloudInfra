@@ -1,0 +1,55 @@
+name: Build, Push CloudInfra for podman check
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Branch name to build from (leave empty to use current branch)'
+        required: false
+        default: ''
+        type: string
+      force_build_deps:
+        description: 'Force build datastream-deps (provide tag version, e.g., 1.0.0)'
+        required: false
+        default: ''
+        type: string
+      force_build_ds:
+        description: 'Force build datastream (provide tag version, e.g., 1.0.0)'
+        required: false
+        default: ''
+        type: string
+  push:
+    branches:
+      - main
+      - guidesh-podman-support
+
+    paths:
+      - 'versions.yml'
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      build_deps: ${{ steps.changes.outputs.build_deps }}
+      build_ds: ${{ steps.changes.outputs.build_ds }}
+      deps_version: ${{ steps.changes.outputs.deps_version }}
+      ds_version: ${{ steps.changes.outputs.ds_version }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
+
+    - name: Install Podman with apt-get
+      run: |
+        sudo apt install podman
+        podman version
+    - name: check podman guide script 
+      run: |
+        pwd
+        cd NGIAB-CloudInfra/
+        ls
